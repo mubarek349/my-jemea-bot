@@ -40,13 +40,13 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
+          className="fixed inset-0 z-30 bg-gray-600 bg-opacity-75 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Mobile sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden ${
+      <div className={`fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         {/* Mobile header */}
@@ -103,7 +103,7 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:flex lg:flex-shrink-0">
-        <div className="flex flex-col w-72">
+        <div className="flex flex-col w-72 fixed inset-y-0 left-0 z-10">
           <div className="flex flex-col flex-grow bg-white border-r border-gray-200 shadow-sm overflow-y-auto">
             {/* Desktop header */}
             <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-200 bg-gradient-to-r from-indigo-600 to-purple-600">
@@ -171,9 +171,9 @@ export default function Sidebar({ isAdmin = false }: SidebarProps) {
       <div className="lg:hidden">
         <button
           onClick={() => setSidebarOpen(true)}
-          className="fixed top-4 left-4 z-30 p-3 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-white/90 bg-white shadow-lg backdrop-blur-sm transition-all duration-200 border border-gray-200"
+          className="fixed top-2 left-2 z-40 p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-white/90 bg-white shadow-md backdrop-blur-sm transition-all duration-200 border border-gray-200"
         >
-          <Bars3Icon className="h-5 w-5" />
+          <Bars3Icon className="h-4 w-4" />
         </button>
       </div>
     </>

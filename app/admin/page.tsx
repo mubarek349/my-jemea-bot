@@ -6,6 +6,7 @@ import {
   ChatBubbleLeftRightIcon, 
   ClockIcon,
   CheckCircleIcon,
+  XCircleIcon,
   ArrowUpIcon,
   ArrowDownIcon,
   EyeIcon,
@@ -23,8 +24,12 @@ export default async function AdminDashboardPage() {
     prisma.user.count(),
     prisma.message.count(),
     prisma.message.count({ where: { sent: true } }),
-    prisma.message.count({ where: { sent: false } }),
+    prisma.message.count({ where: { sent: false, scheduledFor: { not: null }, errorMessage: null } }),
   ]);
+
+  const failedMessages = await prisma.message.count({ 
+    where: { sent: false, errorMessage: { not: null } } 
+  });
 
   const stats = [
     {
@@ -71,13 +76,24 @@ export default async function AdminDashboardPage() {
       changeType: 'negative' as const,
       description: 'Awaiting delivery'
     },
+    {
+      name: 'Failed Messages',
+      value: failedMessages,
+      icon: XCircleIcon,
+      color: 'from-red-500 to-red-600',
+      textColor: 'text-red-600',
+      bgColor: 'bg-red-50',
+      change: failedMessages > 0 ? '+' + failedMessages : '0',
+      changeType: failedMessages > 0 ? 'negative' as const : 'positive' as const,
+      description: 'Delivery failed'
+    },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Page Header */}
       <div className="page-header">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <h1 className="page-title text-gradient">Dashboard</h1>
             <p className="page-subtitle">
@@ -98,7 +114,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map((stat) => (
           <div key={stat.name} className="stat-card group hover:scale-105 transition-transform duration-200">
             <div className="flex items-start justify-between">
@@ -127,7 +143,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Quick Actions & Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Quick Actions */}
         <div className="lg:col-span-2">
           <div className="card-elevated">

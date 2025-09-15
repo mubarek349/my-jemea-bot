@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import { TimezoneStatus } from "@/components/TimezoneStatus";
 import { 
   PlusIcon, 
   EyeIcon, 
@@ -56,7 +57,7 @@ export default async function AdminMessagesPage() {
 
       {/* Search and Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-2">
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
@@ -74,6 +75,9 @@ export default async function AdminMessagesPage() {
             </div>
             <ChatBubbleLeftRightIcon className="h-8 w-8 text-indigo-600" />
           </div>
+        </div>
+        <div className="lg:col-span-1">
+          <TimezoneStatus className="h-full" />
         </div>
       </div>
 

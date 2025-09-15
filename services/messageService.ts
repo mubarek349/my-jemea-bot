@@ -5,9 +5,9 @@ export const MessageService = {
     return prisma.message.create({
       data: {
         content,
-        title,
+        title: title || null,
         senderId,
-        scheduledFor,
+        scheduledFor: scheduledFor || null,
         sent: !scheduledFor, // If no scheduled time, mark as sent immediately
       },
     });
@@ -33,7 +33,47 @@ export const MessageService = {
   async markAsSent(messageId: string) {
     return prisma.message.update({
       where: { id: messageId },
-      data: { sent: true }
+      data: { 
+        sent: true,
+        errorMessage: null // Clear any previous error
+      }
+    });
+  },
+
+  async markMessageAsFailed(messageId: string, errorMessage: string) {
+    return prisma.message.update({
+      where: { id: messageId },
+      data: {
+        sent: false,
+        errorMessage: errorMessage
+      }
+    });
+  },
+
+  async getFailedMessages() {
+    return prisma.message.findMany({
+      where: {
+        sent: false,
+        errorMessage: {
+          not: null
+        }
+      },
+      include: {
+        sender: {
+          select: { chatId: true, firstName: true, username: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  },
+
+  async retryFailedMessage(messageId: string) {
+    return prisma.message.update({
+      where: { id: messageId },
+      data: {
+        errorMessage: null,
+        scheduledFor: new Date() // Retry immediately
+      }
     });
   },
 
@@ -44,15 +84,16 @@ export const MessageService = {
     startOfWeek.setDate(now.getDate() - now.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
 
-    const [totalMessages, sentMessages, scheduledMessages, todayMessages, weekMessages] = await Promise.all([
+    const [totalMessages, sentMessages, scheduledMessages, failedMessages, todayMessages, weekMessages] = await Promise.all([
       prisma.message.count(),
       prisma.message.count({ where: { sent: true } }),
-      prisma.message.count({ where: { sent: false, scheduledFor: { not: null } } }),
+      prisma.message.count({ where: { sent: false, scheduledFor: { not: null }, errorMessage: null } }),
+      prisma.message.count({ where: { sent: false, errorMessage: { not: null } } }),
       prisma.message.count({ where: { createdAt: { gte: startOfToday } } }),
       prisma.message.count({ where: { createdAt: { gte: startOfWeek } } }),
     ]);
 
-    return { totalMessages, sentMessages, scheduledMessages, todayMessages, weekMessages };
+    return { totalMessages, sentMessages, scheduledMessages, failedMessages, todayMessages, weekMessages };
   },
 };
 

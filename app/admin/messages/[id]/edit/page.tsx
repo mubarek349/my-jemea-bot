@@ -3,13 +3,14 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { MessageForm } from "../../MessageForm";
 
-export default async function EditMessagePage({ params }: { params: { id: string } }) {
+export default async function EditMessagePage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   if (!(session.user as any)?.isAdmin) redirect("/");
 
+  const { id } = await params;
   const message = await prisma.message.findUnique({
-    where: { id: params.id }
+    where: { id }
   });
 
   if (!message) {

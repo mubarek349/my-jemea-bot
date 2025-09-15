@@ -16,6 +16,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
+    // Validate scheduled time if provided
+    if (scheduledFor) {
+      const scheduledDate = new Date(scheduledFor);
+      const now = new Date();
+      
+      if (scheduledDate <= now) {
+        return NextResponse.json({ 
+          error: "Scheduled time must be in the future" 
+        }, { status: 400 });
+      }
+      
+      // Check if it's too far in the future (max 1 year)
+      const oneYearFromNow = new Date();
+      oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+      if (scheduledDate > oneYearFromNow) {
+        return NextResponse.json({ 
+          error: "Scheduled time cannot be more than 1 year in the future" 
+        }, { status: 400 });
+      }
+    }
+
     const message = await prisma.message.create({
       data: {
         title: title || null,

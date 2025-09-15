@@ -3,13 +3,14 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 
-export default async function ViewMessagePage({ params }: { params: { id: string } }) {
+export default async function ViewMessagePage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   if (!(session.user as any)?.isAdmin) redirect("/");
 
+  const { id } = await params;
   const message = await prisma.message.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       sender: {
         select: { firstName: true, username: true, isAdmin: true }
@@ -93,7 +94,7 @@ export default async function ViewMessagePage({ params }: { params: { id: string
               <div>
                 <label className="text-sm font-medium text-gray-600">Created</label>
                 <div className="mt-1 text-gray-900">
-                  {message.createdAt.toLocaleString()}
+                  {new Date(message.createdAt).toLocaleString()}
                 </div>
               </div>
             </div>
@@ -102,7 +103,10 @@ export default async function ViewMessagePage({ params }: { params: { id: string
               <div>
                 <label className="text-sm font-medium text-gray-600">Scheduled For</label>
                 <div className="mt-1 text-gray-900">
-                  {message.scheduledFor.toLocaleString()}
+                  {new Date(message.scheduledFor).toLocaleString()}
+                  <span className="text-xs text-gray-500 ml-2">
+                    (Local Time)
+                  </span>
                 </div>
               </div>
             )}
