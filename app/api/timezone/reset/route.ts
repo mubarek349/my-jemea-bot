@@ -3,14 +3,14 @@
  * @description Clears timezone cache and forces fresh detection
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import {  NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 
 /**
  * POST /api/timezone/reset
  * @description Reset timezone detection and clear cache
  */
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Log the reset action
     logger.info('Timezone detection reset requested', {

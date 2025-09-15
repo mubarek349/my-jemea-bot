@@ -126,7 +126,7 @@ export default async function AdminMessagesPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold">
-                            {(message.sender.firstName || "U")[0].toUpperCase()}
+                            {((message.sender.firstName || "User").charAt(0) || "U").toUpperCase()}
                           </div>
                           <div>
                             <div className="text-sm font-medium text-gray-900">

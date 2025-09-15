@@ -66,14 +66,14 @@ function getClientIP(request: NextRequest): string {
   const realIP = request.headers.get('x-real-ip');
   
   if (forwarded) {
-    return forwarded.split(',')[0].trim();
+    return forwarded.split(',')[0]?.trim()??"unknown";
   }
   
   if (realIP) {
     return realIP;
   }
   
-  return request.ip || 'unknown';
+  return "unknown";
 }
 
 /**
@@ -150,7 +150,7 @@ export async function middleware(request: NextRequest) {
       
       // Add user info to headers for API routes
       if (pathname.startsWith('/api')) {
-        response.headers.set('x-user-id', session.user.id);
+        response.headers.set('x-user-id', session.user.id || '');
         response.headers.set('x-user-email', session.user.email || '');
         response.headers.set('x-user-admin', String((session.user as any)?.isAdmin || false));
       }
@@ -159,7 +159,7 @@ export async function middleware(request: NextRequest) {
       logger.error('Authentication error in middleware', {
         ip: clientIP,
         url: request.url,
-        error,
+        error: error instanceof Error ? error : new Error(String(error)),
         action: 'auth_error'
       });
       

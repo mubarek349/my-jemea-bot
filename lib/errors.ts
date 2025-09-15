@@ -242,7 +242,7 @@ export function withErrorHandling<T extends unknown[], R>(
 /**
  * Express-style error handler for Next.js API routes
  */
-export function apiErrorHandler(error: unknown, req: Request, res: Response) {
+export function apiErrorHandler(error: unknown, req: Request) {
   const jemeaError = ErrorHandler.handle(error);
   const response = ErrorHandler.createErrorResponse(jemeaError);
   

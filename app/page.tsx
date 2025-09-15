@@ -4,7 +4,6 @@ import {
   UsersIcon, 
   CogIcon,
   ArrowRightIcon,
-  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 
 export default function Home() {

@@ -35,8 +35,6 @@ const TARGET_GROUP_ID = process.env.TELEGRAM_GROUP_ID;
  * @description Prevents spam and abuse by limiting messages per user
  */
 const rateLimit = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT = 30; // messages per minute
-const RATE_WINDOW = 60 * 1000; // 1 minute
 
 
 /**
@@ -49,7 +47,7 @@ const RATE_WINDOW = 60 * 1000; // 1 minute
  * await bot.start();
  * ```
  */
-export async function startBot() {
+export async function startBot(): Promise<void> {
   console.log("🤖 Starting Telegram Bot...");
 
   // Register user on /start
@@ -297,65 +295,65 @@ export async function startBot() {
   });
 
   // Professional user registration command
-  bot.command("register", async (ctx) => {
-    const chatId = ctx.chat?.id?.toString();
-    const userId = ctx.from?.id?.toString();
+  // bot.command("register", async (ctx) => {
+  //   const chatId = ctx.chat?.id?.toString();
+  //   const userId = ctx.from?.id?.toString();
     
-    // Build context safely for exactOptionalPropertyTypes
-    const context: LogContext = {
-      chatId,
-      action: 'user_register'
-    };
-    if (userId) context.userId = userId;
+  //   // Build context safely for exactOptionalPropertyTypes
+  //   const context: LogContext = {
+  //     chatId,
+  //     action: 'user_register'
+  //   };
+  //   if (userId) context.userId = userId;
 
-    if (!chatId) {
-      logger.error("Unable to retrieve chat ID in register command", context);
-      return ctx.reply("❌ Unable to retrieve chat ID.");
-    }
+  //   if (!chatId) {
+  //     logger.error("Unable to retrieve chat ID in register command", context);
+  //     return ctx.reply("❌ Unable to retrieve chat ID.");
+  //   }
 
-    try {
-      // Check if user is already registered
-      const existingUser = await UserService.getUserByChatId(chatId);
-      if (existingUser) {
-        logger.warn("Already registered user tried to register again", context);
-        return ctx.reply(
-          `✅ <b>Already Registered</b>\n\n` +
-          `You are already registered in our system.\n\n` +
-          `👤 <b>Your Status:</b>\n` +
-          `• Name: ${existingUser.firstName || 'N/A'} ${existingUser.lastName || ''}\n` +
-          `• Role: ${existingUser.isAdmin ? '👑 Admin' : '👤 User'}\n` +
-          `• Status: ${existingUser.isActive ? '✅ Active' : '❌ Inactive'}\n\n` +
-          `Use /help to see available commands.`,
-          { parse_mode: "HTML" }
-        );
-      }
+  //   try {
+  //     // Check if user is already registered
+  //     const existingUser = await UserService.getUserByChatId(chatId);
+  //     if (existingUser) {
+  //       logger.warn("Already registered user tried to register again", context);
+  //       return ctx.reply(
+  //         `✅ <b>Already Registered</b>\n\n` +
+  //         `You are already registered in our system.\n\n` +
+  //         `👤 <b>Your Status:</b>\n` +
+  //         `• Name: ${existingUser.firstName || 'N/A'} ${existingUser.lastName || ''}\n` +
+  //         `• Role: ${existingUser.isAdmin ? '👑 Admin' : '👤 User'}\n` +
+  //         `• Status: ${existingUser.isActive ? '✅ Active' : '❌ Inactive'}\n\n` +
+  //         `Use /help to see available commands.`,
+  //         { parse_mode: "HTML" }
+  //       );
+  //     }
 
-      logger.botAction("User registration initiated", context);
+  //     logger.botAction("User registration initiated", context);
 
-      // Start registration flow
-      const message = 
-        `🔐 <b>User Registration</b>\n\n` +
-        `Welcome! To complete your registration, please provide your verification passcode.\n\n` +
-        `📝 <b>Instructions:</b>\n` +
-        `• You should have received an 8-character passcode from an administrator\n` +
-        `• Reply to this message with your passcode\n` +
-        `• Example: <code>ABC12345</code>\n\n` +
-        `❓ <b>Don't have a passcode?</b>\n` +
-        `Contact an administrator to create your account first.\n\n` +
-        `🔒 <b>Security:</b> Your passcode is single-use and expires after registration.`;
+  //     // Start registration flow
+  //     const message = 
+  //       `🔐 <b>User Registration</b>\n\n` +
+  //       `Welcome! To complete your registration, please provide your verification passcode.\n\n` +
+  //       `📝 <b>Instructions:</b>\n` +
+  //       `• You should have received an 8-character passcode from an administrator\n` +
+  //       `• Reply to this message with your passcode\n` +
+  //       `• Example: <code>ABC12345</code>\n\n` +
+  //       `❓ <b>Don't have a passcode?</b>\n` +
+  //       `Contact an administrator to create your account first.\n\n` +
+  //       `🔒 <b>Security:</b> Your passcode is single-use and expires after registration.`;
 
-      await ctx.reply(message, { parse_mode: "HTML" });
+  //     await ctx.reply(message, { parse_mode: "HTML" });
 
-      // Set up passcode listening mode for this user
-      // Note: In a production environment, you might want to use a more sophisticated state management
+  //     // Set up passcode listening mode for this user
+  //     // Note: In a production environment, you might want to use a more sophisticated state management
       
-    } catch (error) {
-      const jemeaError = ErrorHandler.handle(error, context);
-      logger.error("Error in register command", { ...context, error: jemeaError });
+  //   } catch (error) {
+  //     const jemeaError = ErrorHandler.handle(error, context);
+  //     logger.error("Error in register command", { ...context, error: jemeaError });
       
-      return ctx.reply("❌ An error occurred during registration. Please try again later.");
-    }
-  });
+  //     return ctx.reply("❌ An error occurred during registration. Please try again later.");
+  //   }
+  // });
 
   // Command to list pending registrations (Admin only)
   bot.command("pending", async (ctx) => {
@@ -846,7 +844,8 @@ export async function startBot() {
             `👥 <b>User Management</b>\n\nSelect a user to manage:`,
             { parse_mode: "HTML", reply_markup: keyboard }
           );
-          break;
+          await ctx.answerCallbackQuery();
+          return;
 
         case "admin_stats":
           // Show statistics
@@ -859,22 +858,27 @@ export async function startBot() {
             `💬 <b>Messages:</b> ${messageStats.totalMessages} total, ${messageStats.sentMessages} sent, ${messageStats.scheduledMessages} scheduled`;
 
           await ctx.editMessageText(statsMessage, { parse_mode: "HTML" });
-          break;
+          await ctx.answerCallbackQuery();
+          return;
 
         case "admin_panel":
           await ctx.answerCallbackQuery("🌐 Opening admin panel...");
           await ctx.reply("🌐 Admin panel: " + (process.env.ADMIN_PANEL_URL || "http://localhost:3000/admin"));
-          break;
-      }
+          return;
 
-      await ctx.answerCallbackQuery();
+        default:
+          // Handle unknown callback data
+          logger.warn("Unknown callback query data received", { data, chatId });
+          await ctx.answerCallbackQuery("❌ Unknown action.");
+          return;
+      }
     } catch (error) {
       logger.error("Error handling callback query", { 
         error: error instanceof Error ? error : new Error(String(error)), 
         data, 
         chatId 
       });
-      await ctx.answerCallbackQuery("❌ An error occurred.");
+      return ctx.answerCallbackQuery("❌ An error occurred.");
     }
   });
 
@@ -962,6 +966,8 @@ export async function startBot() {
         action: 'passcode_verification_success',
         isAdmin: verificationResult.isAdmin
       });
+      
+      return;
 
     } catch (error) {
       logger.error("Error processing passcode verification", { 

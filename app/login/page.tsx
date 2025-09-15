@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/lib/zodSchema";
 import { authenticate } from "../../actions/authentication";
 import { Button, Input, Card, CardBody, CardHeader } from "@heroui/react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
@@ -17,7 +16,6 @@ function LoginPage() {
   const router = useRouter();
   const {
     handleSubmit,
-    register,
     formState: { errors },
     setError,
     setValue,

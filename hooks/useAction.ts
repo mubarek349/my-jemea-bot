@@ -16,7 +16,7 @@ export default function useAction<
   boolean
 ] {
   const [data, action, loading] = useActionState(
-    async (prev: Data | undefined, payload: Args) => {
+    async (_: Data | undefined, payload: Args) => {
       return await func(...payload);
     },
     undefined
