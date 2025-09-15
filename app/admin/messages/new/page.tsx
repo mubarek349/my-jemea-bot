@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
 import { MessageForm } from "../MessageForm";
 
 export default async function NewMessagePage() {
