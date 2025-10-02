@@ -32,3 +32,11 @@ export const questionSchema = z.object({
     .min(1, "answer is required"),
 });
 export type TQuestion = z.infer<typeof questionSchema>;
+
+// User registration schema
+export const userRegistrationSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().optional(),
+  phoneno: z.string().regex(/^\+?[0-9]{10,15}$/, "Invalid phone number format"),
+});
+export type UserRegistration = z.infer<typeof userRegistrationSchema>;

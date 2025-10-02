@@ -423,7 +423,7 @@ export async function startBot(): Promise<void> {
       return ctx.reply("❌ User is already an admin.");
     }
 
-    await UserService.promoteToAdmin(targetUser.chatId);
+    // await UserService.promoteToAdmin(targetUser.chatId);
     return ctx.reply(`✅ @${targetUsername} has been promoted to admin.`);
   });
 
@@ -457,7 +457,7 @@ export async function startBot(): Promise<void> {
       return ctx.reply("❌ User is not an admin.");
     }
 
-    await UserService.demoteFromAdmin(targetUser.chatId);
+    // await UserService.demoteFromAdmin(targetUser.chatId);
     return ctx.reply(`✅ @${targetUsername} has been demoted from admin.`);
   });
 
@@ -1011,7 +1011,7 @@ export async function startBot(): Promise<void> {
         for (const message of scheduledMessages) {
           const messageContext: LogContext = {
             messageId: message.id,
-            chatId: TARGET_GROUP_ID || message.sender.chatId,
+            // chatId: TARGET_GROUP_ID || message.sender.chatId,
             userId: message.senderId,
             action: 'send_scheduled_message'
           };

@@ -30,39 +30,17 @@ export class CustomError extends Error {
 
 const authConfig = {
   trustHost: true,
-  pages: {
-    signIn: "/login",
-    // signOut: "/signout",
-  },
   callbacks: {
-    authorized: async ({ auth, request: { nextUrl } }) => {
-      const isAdminRoute = nextUrl.pathname.startsWith("/admin");
-
-      if (!auth) {
-        // Block unauthenticated access to admin
-        if (isAdminRoute) return false;
-        return true;
-      }
-
-      // If hitting login while authenticated, route depending on role
-      if (nextUrl.pathname.startsWith("/login")) {
-        const destination = auth?.user && (auth.user as any).isAdmin ? "/admin" : "/";
-        return Response.redirect(new URL(destination, nextUrl));
-      }
-
-      // Allow only admins on admin routes
-      if (isAdminRoute) {
-        return Boolean((auth.user as any)?.isAdmin);
-      }
-
-      return true;
-    },
     jwt: async ({ token, user }) => {
       return { ...token, ...user };
     },
     session: async ({ session, token }) => {
       return { ...session, user: { ...session.user, ...token } };
     },
+  },
+  pages: {
+    signIn: "/login",
+    // signOut: "/signout",
   },
   providers: [
     Credentials({

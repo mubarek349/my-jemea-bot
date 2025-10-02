@@ -118,14 +118,29 @@ export async function middleware(request: NextRequest) {
     response.headers.set(key, value);
   });
 
-  // Authentication for protected routes
+  // Authentication handling
   const { pathname } = request.nextUrl;
-  const isProtectedRoute = pathname.startsWith('/admin') || pathname.startsWith('/api');
+  const isPublicApiRoute = pathname.startsWith('/api/users'); // Allow public access to users API
+  const isProtectedRoute = pathname.startsWith('/admin') || (pathname.startsWith('/api') && !isPublicApiRoute);
+  const isLoginPage = pathname.startsWith('/login');
   
-  if (isProtectedRoute) {
-    try {
-      const session = await auth();
+  try {
+    const session = await auth();
+    
+    // If user is authenticated and tries to access login page, redirect to admin
+    if (session?.user && isLoginPage) {
+      logger.info('Authenticated user redirected from login to admin', {
+        ip: clientIP,
+        userId: session.user.id,
+        url: request.url,
+        action: 'login_redirect'
+      });
       
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
+    
+    // Handle protected routes
+    if (isProtectedRoute) {
       if (!session?.user) {
         logger.warn('Unauthorized access attempt', {
           ip: clientIP,
@@ -154,15 +169,18 @@ export async function middleware(request: NextRequest) {
         response.headers.set('x-user-email', session.user.email || '');
         response.headers.set('x-user-admin', String((session.user as any)?.isAdmin || false));
       }
-      
-    } catch (error) {
-      logger.error('Authentication error in middleware', {
-        ip: clientIP,
-        url: request.url,
-        error: error instanceof Error ? error : new Error(String(error)),
-        action: 'auth_error'
-      });
-      
+    }
+    
+  } catch (error) {
+    logger.error('Authentication error in middleware', {
+      ip: clientIP,
+      url: request.url,
+      error: error instanceof Error ? error : new Error(String(error)),
+      action: 'auth_error'
+    });
+    
+    // Only redirect to login if it's a protected route
+    if (isProtectedRoute) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
   }
